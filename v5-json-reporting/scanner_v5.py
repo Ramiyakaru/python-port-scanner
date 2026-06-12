@@ -2,7 +2,7 @@ import socket
 import sys
 import json
 from concurrent.futures import ThreadPoolExecutor
-
+from tqdm import tqdm
 
 scan_results = []
 
@@ -66,15 +66,17 @@ def worker(host, port):
     if is_open:
         banner = grab_banner(host, port)
 
-        result = {
+        return {
             "port": port,
             "status": "OPEN",
             "banner": banner
         }
 
-        print(f"[+] Port {port} OPEN | {banner}")
-
-        scan_results.append(result)
+    return {
+        "port": port,
+        "status": "CLOSED",
+        "banner": ""
+    }
 
 
 if __name__ == "__main__":
@@ -90,10 +92,38 @@ if __name__ == "__main__":
     print("-" * 50)
 
     with ThreadPoolExecutor(max_workers=100) as executor:
-        executor.map(lambda p: worker(target_host, p), ports_to_scan)
+
+        scan_results = list(
+            tqdm(
+                executor.map(
+                    lambda p: worker(target_host, p),
+                    ports_to_scan
+                ),
+                total=len(ports_to_scan),
+                desc="Scanning Ports",
+                unit="port",
+                ncols=100
+            )
+        )
+
+    print()
+
+for result in scan_results:
+
+    if result["status"] == "OPEN":
+        print(
+            f"[+] Port {result['port']} OPEN | "
+            f"{result['banner']}"
+        )
+
+    else:
+        print(
+            f"[-] Port {result['port']} CLOSED or FILTERED"
+        )
 
     with open("scan_results.json", "w") as f:
         json.dump(scan_results, f, indent=4)
+    
 
-    print("-" * 50)
-    print("Scan complete. Results saved to scan_results.json")
+print("-" * 50)
+print("Scan complete. Results saved to scan_results.json")

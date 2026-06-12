@@ -73,10 +73,26 @@ if __name__ == "__main__":
 
         if is_open:
             banner = grab_banner(target_host, port)
-            print(f"[+] Port {port} OPEN | {banner}")
+            return f"[+] Port {port} OPEN | {banner}"
+
+        return f"[-] Port {port} CLOSED or FILTERED"
 
     with ThreadPoolExecutor(max_workers=100) as executor:
-        executor.map(worker, ports_to_scan)
 
-    print("-" * 50)
-    print("Scan complete")
+        results = list(
+            tqdm(
+                executor.map(worker, ports_to_scan),
+                total=len(ports_to_scan),
+                desc="Scanning Ports",
+                unit="port",
+                ncols=100
+            )
+        )
+
+    print()
+
+    for result in results:
+        print(result)
+        
+print("-" * 50)
+print("Scan complete")

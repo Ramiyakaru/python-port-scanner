@@ -56,16 +56,27 @@ if __name__ == "__main__":
 
     def worker(port):
         port, is_open = scan_port(target_host, port)
+
         if is_open:
-            print(f"[+] Port {port} OPEN")
+            return f"[+] Port {port} OPEN"
+
+        return f"[-] Port {port} CLOSED or FILTERED"
 
     with ThreadPoolExecutor(max_workers=100) as executor:
-        list(tqdm(
-    executor.map(worker, ports_to_scan),
-    total=len(ports_to_scan),
-    desc="Scanning Ports",
-    ncols= 100
-    ))
 
-    print("-" * 50)
-    print("Scan complete")
+        results = list(
+            tqdm(
+                executor.map(worker, ports_to_scan),
+                total=len(ports_to_scan),
+                desc="Scanning Ports",
+                ncols=100
+            )
+        )
+
+    print()
+
+    for result in results:
+        print(result)
+
+print("-" * 50)
+print("Scan complete")

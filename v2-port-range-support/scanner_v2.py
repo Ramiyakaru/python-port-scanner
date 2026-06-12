@@ -79,7 +79,8 @@ if __name__ == "__main__":
     print(f"Total ports to scan: {len(ports_to_scan)}")
     print("-" * 50)
 
-    # Scan each port with progress bar
+results = []
+
 for port in tqdm(
     ports_to_scan,
     desc="Scanning Ports",
@@ -87,9 +88,14 @@ for port in tqdm(
     ncols=100
 ):
     if scan_port(target_host, port):
-        print(f"[+] Port {port} OPEN")
+        results.append(f"[+] Port {port} OPEN")
     else:
-        print(f"[-] Port {port} CLOSED or FILTERED")
+        results.append(f"[-] Port {port} CLOSED or FILTERED")
 
-    print("-" * 50)
-    print("Scan complete")
+print()
+
+for result in results:
+    print(result)
+
+print("-" * 50)
+print("Scan complete")
