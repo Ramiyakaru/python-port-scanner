@@ -3,8 +3,11 @@ import sys
 import json
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
+from datetime import datetime
 
 scan_results = []
+
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
 def scan_port(host, port):
@@ -108,6 +111,8 @@ if __name__ == "__main__":
 
     print()
 
+filename = f"scan_resutls_{timestamp}.json"
+
 for result in scan_results:
 
     if result["status"] == "OPEN":
@@ -121,9 +126,9 @@ for result in scan_results:
             f"[-] Port {result['port']} CLOSED or FILTERED"
         )
 
-    with open("scan_results.json", "w") as f:
+    with open(filename, "w") as f:
         json.dump(scan_results, f, indent=4)
     
 
 print("-" * 50)
-print("Scan complete. Results saved to scan_results.json")
+print(f"Scan complete. Results saved to {filename}")
